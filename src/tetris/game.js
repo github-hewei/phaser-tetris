@@ -108,8 +108,6 @@ export class Game extends Phaser.Scene {
 
       if (result) {
         this.$mainBox.$clearRow(i)
-
-        // this.$mainBox.$display()
         this.$score += 1
       }
     }
@@ -123,9 +121,9 @@ export class Game extends Phaser.Scene {
     }
 
     if (this.$nextBrick) {
-      let { shape, index } = this.$nextBrick
+      let { $shape, $index } = this.$nextBrick
       this.$nextBrick.destroy()
-      this.$brick = new Brick(this, shape, index)
+      this.$brick = new Brick(this, $shape, $index)
     } else {
       this.$brick = new Brick(this)
     }

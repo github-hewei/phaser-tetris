@@ -64,29 +64,55 @@ export class MainBox extends Phaser.GameObjects.Container {
     graphics.fillStyle(color, 1)
     graphics.fillRect(0, 0, this.$size - 1, this.$size - 1)
 
-    graphics.BG = 1
     graphics.setDepth(1)
 
     return graphics
   }
 
   $addBrick(brick) {
-    this.$index++
-    let name = `brick_${this.$index}`
-    this.$brickList.push(name)
-    brick.setName(name)
-    brick.setDepth(2)
-    brick.BR = 1
     this.add(brick)
   }
 
-  $clearRow(index) {
-    this.$matrix.splice(index, 1)
+  $clearRow(y) {
+    this.$matrix.splice(y, 1)
     this.$matrix.unshift(new Array(this.$w).fill(0))
 
-    let bricks = this.getAll('BR', 1)
+    let bricks = this.getAll('$name', 'brick')
     for (let brick of bricks) {
-      brick.$checkClear(index)
+      if (y >= brick.$my + brick.$sy && y <= brick.$my + brick.$ey) {
+        let row = y - brick.$my
+        brick.$matrix.splice(row, 1)
+        brick.$display()
+
+        // 如果矩阵为空则删除此对象
+        let result = brick.$matrix.every((item) => item.every((item) => item == 0))
+
+        if (result) {
+          this.remove(brick, true)
+          continue
+        }
+      }
+
+      if (brick.$my + brick.$ey <= y) {
+        brick.$setMXY(brick.$mx, brick.$my + 1)
+      }
     }
   }
 }
+
+// 012345678
+// 100000000
+// 200000000
+// 300000000
+// 400000000
+// 500000000 0
+// 600x00000 1
+// 70xxx0000 2
+
+// y=7
+// my=5
+// sy=1
+// ey=2
+
+// y>=my+sy && y<=my+ey
+// y-my

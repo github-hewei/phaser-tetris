@@ -24,13 +24,13 @@ export const TETRIS_SIGN = ['I', 'O', 'T', 'L', 'J', 'S', 'Z']
 
 // 俄罗斯方块颜色
 export const TETRIS_COLOR = {
-  1: 0x00ffff,
-  2: 0xffff00,
-  3: 0xff00ff,
-  4: 0xff0000,
-  5: 0x0000ff,
-  6: 0x00ff00,
-  7: 0xff0000
+  1: 0xade8f4,
+  2: 0xccead6,
+  3: 0xfde7a7,
+  4: 0xe6d4f5,
+  5: 0xfdb813,
+  6: 0xf9c2d7,
+  7: 0xebebeb
 }
 
 // 俄罗斯方块矩阵

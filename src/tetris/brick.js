@@ -1,11 +1,13 @@
 import Phaser from 'phaser'
-import { UNIT_SIZE, TETRIS_MATRIX, TETRIS_SIGN } from './constant'
+import { UNIT_SIZE, TETRIS_MATRIX, TETRIS_SIGN, TETRIS_COLOR } from './constant'
 
 export class Brick extends Phaser.GameObjects.Container {
   constructor(scene, shape, index) {
     super(scene, 0, 0)
 
+    this.$name = 'brick'
     this.$size = UNIT_SIZE
+    this.$color = TETRIS_COLOR
     this.$shape
     this.$index
     this.$matrices
@@ -146,31 +148,18 @@ export class Brick extends Phaser.GameObjects.Container {
           continue
         }
 
-        this.add(this.$draw(j, i))
+        this.add(this.$draw(j, i, this.$matrix[i][j]))
       }
     }
   }
 
-  $draw(x, y) {
+  $draw(x, y, n) {
     const graphics = this.scene.add.graphics({ x: x * this.$size, y: y * this.$size })
     graphics.fillStyle(0x666666, 1)
     graphics.fillRect(1, 1, this.$size, this.$size)
 
-    graphics.fillStyle(0xff0000, 1)
+    graphics.fillStyle(this.$color[n], 1)
     graphics.fillRect(0, 0, this.$size - 1, this.$size - 1)
     return graphics
-  }
-
-  $checkClear(y) {
-    // index > brick.my + brick.sy && index < brick.my + ey + 1
-    // console.log("checkClear", index, this.$my, this.$sy, this.$ey);
-    // my sy ey y
-    // if (y < this.$my + this.$sy + 1 || y > this.$my + this.$ey) {
-    //   return
-    // }
-    // let row = y - this.$my + this.$sy
-    // console.log("row", row)
-    // this.$matrix.splice(row, 1)
-    // this.$my += 1
   }
 }
