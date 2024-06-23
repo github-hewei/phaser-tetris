@@ -22,15 +22,18 @@ export const KEYBOARD_DURATION = 100
 // 俄罗斯方块名字
 export const TETRIS_SIGN = ['I', 'O', 'T', 'L', 'J', 'S', 'Z']
 
+// 调试模式
+export const DEBUG = true;
+
 // 俄罗斯方块颜色
 export const TETRIS_COLOR = {
-  1: 0xade8f4,
-  2: 0xccead6,
-  3: 0xfde7a7,
-  4: 0xe6d4f5,
-  5: 0xfdb813,
-  6: 0xf9c2d7,
-  7: 0xebebeb
+  1: 0xff0000, // 红I
+  2: 0x44d657, // 绿O
+  3: 0xfdee21, // 黄T
+  4: 0x33c1ff, // 蓝L
+  5: 0xd8b3e7, // 紫J
+  6: 0x97a2e4, // 兰S
+  7: 0x73e3ee, // 青Z
 }
 
 // 俄罗斯方块矩阵

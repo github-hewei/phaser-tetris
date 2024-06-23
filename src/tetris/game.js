@@ -16,13 +16,13 @@ const DIRECTION = {
 }
 
 export class Game extends Phaser.Scene {
-
   constructor() {
     super({ key: 'Game' })
 
     this.$cursorKeys
     this.$delay
     this.$timer
+    this.$cleanTimer
     this.$state
     this.$step
     this.$score
@@ -38,6 +38,7 @@ export class Game extends Phaser.Scene {
     this.$cursorKeys = this.input.keyboard.createCursorKeys()
     this.$mainBox = new MainBox(this, 10, 10)
     this.$mainBox.$display()
+    this.$mainBox.$debugDisplayText()
     this.add.existing(this.$mainBox)
   }
 
@@ -62,12 +63,30 @@ export class Game extends Phaser.Scene {
     }
   }
 
+  $touchCleanTimer() {
+    let eventConfig = {
+      delay: 100,
+      loop: true,
+      startAt: 100,
+      callback: () => {
+        this.$checkClear()
+      }
+    }
+
+    if (!this.$cleanTimer) {
+      this.$cleanTimer = this.time.addEvent(eventConfig)
+    } else {
+      this.$cleanTimer.reset(eventConfig)
+    }
+  }
+
   $gameStart() {
     this.$delay = 2000
     this.$score = 0
     this.$step = 0
     this.$state = STATE.RUNNING
     this.$touchTimer()
+    this.$touchCleanTimer()
   }
 
   $gamePause() {
@@ -84,22 +103,13 @@ export class Game extends Phaser.Scene {
     }
 
     this.$step++
-    console.log('step', this.$step)
+    console.log('step', this.$step, this.$score)
 
     if (!this.$brick) {
-      console.log(111)
       this.$brickRefresh()
     } else {
-      console.log(222)
-      this.$brickFall()
+      this.$brickDown()
     }
-
-    this.$checkClear()
-
-    // 下落
-    // 触底
-    // 消除
-    // 结束
   }
 
   $checkClear() {
@@ -109,6 +119,11 @@ export class Game extends Phaser.Scene {
       if (result) {
         this.$mainBox.$clearRow(i)
         this.$score += 1
+
+        if (this.$score >= 3) {
+          this.$delay = 500
+          this.$touchTimer()
+        }
       }
     }
   }
@@ -116,46 +131,31 @@ export class Game extends Phaser.Scene {
   $brickRefresh() {
     if (this.$brick) {
       this.$mainBox.$mapping(this.$brick.$matrix, this.$brick.$mx, this.$brick.$my)
-      // this.$mainBox.$display()
-      // this.$brick.$destroy()
+      this.$brick.$fixed = 1
     }
 
     if (this.$nextBrick) {
       let { $shape, $index } = this.$nextBrick
       this.$nextBrick.destroy()
       this.$brick = new Brick(this, $shape, $index)
+
     } else {
       this.$brick = new Brick(this)
     }
 
     this.$nextBrick = new Brick(this)
     this.$nextBrick.$display()
+    this.$nextBrick.$debugDisplayText()
+    this.$nextBrick.setX(400)
     this.add.existing(this.$nextBrick)
 
     let x = Math.floor((this.$mainBox.$w - this.$brick.$ex - this.$brick.$sx) / 2)
     let y = this.$mainBox.$maskSize - this.$brick.$ey - 1
 
-    // let result = this.$checkIntersect(
-    //   this.$mainBox.$matrix,
-    //   this.$brick.$matrix,
-    //   x,
-    //   y,
-    //   this.$brick.$sx,
-    //   this.$brick.$sy,
-    //   this.$brick.$ex,
-    //   this.$brick.$ey
-    // )
-
-    // if (result) {
-    //   this.$gameOver()
-    //   return
-    // }
-
-    // this.$mainBox.$add(this.$brick)
     this.$brick.$display()
+    this.$brick.$debugDisplayText()
     this.$brick.$setMXY(x, y)
-    this.$mainBox.$addBrick(this.$brick)
-
+    this.$mainBox.add(this.$brick)
   }
 
   $gameOver() {
@@ -163,7 +163,7 @@ export class Game extends Phaser.Scene {
     this.$state = STATE.ENDED
   }
 
-  $brickFall() {
+  $brickDown() {
     let result = this.$brickMove(DIRECTION.DOWN)
 
     if (result) {
@@ -212,7 +212,7 @@ export class Game extends Phaser.Scene {
         return
       }
 
-      this.$brickFall()
+      this.$brickDown()
     }
 
     if (this.input.keyboard.checkDown(left, durationX)) {
@@ -293,6 +293,7 @@ export class Game extends Phaser.Scene {
 
     this.$brick.$setIndex(index)
     this.$brick.$display()
+    this.$brick.$debugDisplayText()
     return true
   }
 

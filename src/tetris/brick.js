@@ -1,5 +1,5 @@
 import Phaser from 'phaser'
-import { UNIT_SIZE, TETRIS_MATRIX, TETRIS_SIGN, TETRIS_COLOR } from './constant'
+import { UNIT_SIZE, TETRIS_MATRIX, TETRIS_SIGN, TETRIS_COLOR, DEBUG } from './constant'
 
 export class Brick extends Phaser.GameObjects.Container {
   constructor(scene, shape, index) {
@@ -16,6 +16,7 @@ export class Brick extends Phaser.GameObjects.Container {
     this.$sy
     this.$ex
     this.$ey
+    this.$fixed = 0
 
     this.$mx = 0
     this.$my = 0
@@ -31,7 +32,7 @@ export class Brick extends Phaser.GameObjects.Container {
 
   $setIndex(index) {
     this.$index = index
-    this.$matrix = this.$matrices[this.$index]
+    this.$matrix = [...this.$matrices[this.$index]]
     this.$initRXY()
   }
 
@@ -41,7 +42,7 @@ export class Brick extends Phaser.GameObjects.Container {
 
   $getNextMatrix() {
     let index = this.$getNextIndex()
-    let matrix = this.$matrices[index]
+    let matrix = [...this.$matrices[index]]
 
     let [sx, sy] = this.$getSXY(matrix)
     let [ex, ey] = this.$getEXY(matrix)
@@ -51,7 +52,16 @@ export class Brick extends Phaser.GameObjects.Container {
   $setMXY(x, y) {
     this.$mx = x
     this.$my = y
-    this.setPosition(this.$mx * this.$size, this.$my * this.$size)
+    // this.setPosition(this.$mx * this.$size, this.$my * this.$size)
+
+    // 补间动画
+    let tween = this.scene.tweens.add({
+      targets: this,
+      x: this.$mx * this.$size,
+      y: this.$my * this.$size,
+      duration: 120,
+      ease: Phaser.Math.Easing.Bounce.Out
+    })
   }
 
   $getRandomShape() {
@@ -140,26 +150,49 @@ export class Brick extends Phaser.GameObjects.Container {
   }
 
   $display() {
-    this.removeAll(true)
+    let name = 'brick_item'
+    this.remove(this.getAll('$name', name), true)
 
-    for (let i = 0; i < this.$matrix.length; i++) {
-      for (let j = 0; j < this.$matrix[i].length; j++) {
-        if (!this.$matrix[i][j]) {
+    for (let y = 0; y < this.$matrix.length; y++) {
+      for (let x = 0; x < this.$matrix[y].length; x++) {
+        if (!this.$matrix[y][x]) {
           continue
         }
 
-        this.add(this.$draw(j, i, this.$matrix[i][j]))
+        const n = this.$matrix[y][x]
+        const graphics = this.scene.add.graphics({ x: x * this.$size, y: y * this.$size })
+        graphics.fillStyle(0x666666, 0.4)
+        graphics.fillRect(1, 1, this.$size, this.$size)
+        graphics.fillStyle(this.$color[n], 0.4)
+        graphics.fillRect(0, 0, this.$size - 1, this.$size - 1)
+        graphics.$name = name
+
+        this.add(graphics)
       }
     }
   }
 
-  $draw(x, y, n) {
-    const graphics = this.scene.add.graphics({ x: x * this.$size, y: y * this.$size })
-    graphics.fillStyle(0x666666, 1)
-    graphics.fillRect(1, 1, this.$size, this.$size)
+  $debugDisplayText() {
+    if (!DEBUG) return
+    let name = 'debug_brick_text'
+    this.remove(this.getAll('$name', name), true)
 
-    graphics.fillStyle(this.$color[n], 1)
-    graphics.fillRect(0, 0, this.$size - 1, this.$size - 1)
-    return graphics
+    for (let y = 0; y < this.$matrix.length; y++) {
+      for (let x = 0; x < this.$matrix[y].length; x++) {
+        if (!this.$matrix[y][x]) {
+          continue
+        }
+
+        let n = this.$matrix[y][x]
+        const text = this.scene.add.text(x * this.$size, y * this.$size, n, {
+          fontSize: '10px',
+          fill: '#ffffff',
+          fontFamily: 'Arial',
+          align: 'center'
+        })
+        text.$name = name
+        this.add(text)
+      }
+    }
   }
 }

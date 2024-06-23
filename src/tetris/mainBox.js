@@ -1,5 +1,5 @@
 import Phaser from 'phaser'
-import { MAIN_SIZE_X, MAIN_SIZE_Y, UNIT_SIZE, MASK_SIZE } from './constant'
+import { MAIN_SIZE_X, MAIN_SIZE_Y, UNIT_SIZE, MASK_SIZE, DEBUG } from './constant'
 
 export class MainBox extends Phaser.GameObjects.Container {
   constructor(scene, x, y) {
@@ -38,81 +38,79 @@ export class MainBox extends Phaser.GameObjects.Container {
         }
       }
     }
+
+    this.$debugDisplayText()
   }
 
   $display() {
-    // console.log(this.$getAll('BG', 1))
-    // let list = this.$getAll('BG', 1)
-    // let list2 = this.$getAll('BR', 1)
-    // console.log("count", list.length, list2.length)
-    // this.$remove(list, true)
+    let name = 'mainbox_item'
+    this.remove(this.getAll('$name', name), true)
 
-    for (let i = 0; i < this.$matrix.length; i++) {
-      for (let j = 0; j < this.$matrix[i].length; j++) {
-        // this.$add(this.$draw(j, i, this.$matrix[i][j]))
-        this.add(this.$draw(j, i, 0))
+    for (let y = 0; y < this.$matrix.length; y++) {
+      for (let x = 0; x < this.$matrix[y].length; x++) {
+        // let n = this.$matrix[i][j]
+        const graphics = this.scene.add.graphics({ x: x * this.$size, y: y * this.$size })
+        graphics.fillStyle(0x666666, 1)
+        graphics.fillRect(1, 1, this.$size, this.$size)
+        graphics.fillStyle(0xebebeb, 1)
+        graphics.fillRect(0, 0, this.$size - 1, this.$size - 1)
+        graphics.setDepth(1)
+        graphics.$name = name
+        this.add(graphics)
       }
     }
   }
 
-  $draw(x, y, n) {
-    const graphics = this.scene.add.graphics({ x: x * this.$size, y: y * this.$size })
-    graphics.fillStyle(0x666666, 1)
-    graphics.fillRect(1, 1, this.$size, this.$size)
+  $debugDisplayText() {
+    if (!DEBUG) return
+    let name = 'debug_text_mainbox'
+    this.remove(this.getAll('$name', name), true)
 
-    let color = n ? 0xff0000 : 0xebebeb
-    graphics.fillStyle(color, 1)
-    graphics.fillRect(0, 0, this.$size - 1, this.$size - 1)
-
-    graphics.setDepth(1)
-
-    return graphics
+    for (let i = 0; i < this.$matrix.length; i++) {
+      for (let j = 0; j < this.$matrix[i].length; j++) {
+        let n = this.$matrix[i][j]
+        let x = j * this.$size + this.$size - 10
+        let y = i * this.$size + this.$size - 14
+        const text = this.scene.add.text(x, y, n, {
+          fontSize: '10px',
+          fill: '#333333',
+          fontFamily: 'Arial',
+          align: 'center'
+        })
+        text.$name = name
+        this.add(text)
+      }
+    }
   }
 
-  $addBrick(brick) {
-    this.add(brick)
-  }
-
-  $clearRow(y) {
-    this.$matrix.splice(y, 1)
+  $clearRow(row) {
+    this.$matrix.splice(row, 1)
     this.$matrix.unshift(new Array(this.$w).fill(0))
+    this.$debugDisplayText()
 
     let bricks = this.getAll('$name', 'brick')
+
     for (let brick of bricks) {
-      if (y >= brick.$my + brick.$sy && y <= brick.$my + brick.$ey) {
-        let row = y - brick.$my
-        brick.$matrix.splice(row, 1)
+      if (!brick.$fixed) continue
+      if (row >= brick.$my + brick.$sy && row <= brick.$my + brick.$ey) {
+        let k = row - brick.$my
+        let len = brick.$matrix[k].length
+        brick.$matrix.splice(k, 1)
+        brick.$matrix.unshift(new Array(len).fill(0))
         brick.$display()
+        brick.$debugDisplayText()
 
         // 如果矩阵为空则删除此对象
         let result = brick.$matrix.every((item) => item.every((item) => item == 0))
 
         if (result) {
           this.remove(brick, true)
-          continue
         }
       }
 
-      if (brick.$my + brick.$ey <= y) {
+      if (brick.$my + brick.$ey < row) {
         brick.$setMXY(brick.$mx, brick.$my + 1)
       }
     }
   }
 }
-
-// 012345678
-// 100000000
-// 200000000
-// 300000000
-// 400000000
-// 500000000 0
-// 600x00000 1
-// 70xxx0000 2
-
-// y=7
-// my=5
-// sy=1
-// ey=2
-
-// y>=my+sy && y<=my+ey
-// y-my
