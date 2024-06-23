@@ -52,6 +52,7 @@ export class MainBox extends Phaser.GameObjects.Container {
         const graphics = this.scene.add.graphics({ x: x * this.$size, y: y * this.$size })
         graphics.fillStyle(0x666666, 1)
         graphics.fillRect(1, 1, this.$size, this.$size)
+
         graphics.fillStyle(0xebebeb, 1)
         graphics.fillRect(0, 0, this.$size - 1, this.$size - 1)
         graphics.setDepth(1)
@@ -59,6 +60,24 @@ export class MainBox extends Phaser.GameObjects.Container {
         this.add(graphics)
       }
     }
+
+    this.$setMask()
+  }
+
+  $setMask() {
+    let maskGraphics = this.scene.make.graphics({
+      x: 0,
+      y: 0
+    })
+    maskGraphics.fillStyle(0xffffff)
+    maskGraphics.fillRect(
+      this.x + 1,
+      this.y + this.$maskSize * this.$size + 1,
+      this.$w * this.$size,
+      this.$h * this.$size - this.$maskSize * this.$size
+    )
+
+    this.setMask(maskGraphics.createGeometryMask())
   }
 
   $debugDisplayText() {

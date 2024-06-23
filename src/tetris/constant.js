@@ -1,11 +1,11 @@
 // 窗口宽度
-export const WINDOW_WIDTH = 1024
+export const WINDOW_WIDTH = 800
 
 // 窗口高度
-export const WINDOW_HEIGHT = 768
+export const WINDOW_HEIGHT = 1024
 
 // 方块大小
-export const UNIT_SIZE = 30
+export const UNIT_SIZE = 40
 
 // 游戏区域横向格数
 export const MAIN_SIZE_X = 10
@@ -23,7 +23,7 @@ export const KEYBOARD_DURATION = 100
 export const TETRIS_SIGN = ['I', 'O', 'T', 'L', 'J', 'S', 'Z']
 
 // 调试模式
-export const DEBUG = true;
+export const DEBUG = true
 
 // 俄罗斯方块颜色
 export const TETRIS_COLOR = {

@@ -31,15 +31,34 @@ export class Game extends Phaser.Scene {
     this.$mainBox
     this.$nextBox
     this.$maskSize = 4
+    this.$audioBgm
+    this.$audioDing
+    this.$keys
+    this.$nextShape
+  }
+
+  preload() {
+    this.load.image('background', 'assets/background.jpg')
+    this.load.audio('bgm', 'assets/bgm.mp3')
+    this.load.audio('ding', 'assets/ding.mp3')
   }
 
   create() {
+    let width = this.cameras.main.width
+    let height = this.cameras.main.height
+    this.add.image(0, 0, 'background').setOrigin(0, 0).setDisplaySize(width, height)
+
     this.$state = STATE.UNSTART
-    this.$cursorKeys = this.input.keyboard.createCursorKeys()
-    this.$mainBox = new MainBox(this, 10, 10)
+    this.$mainBox = new MainBox(this, 50, 10)
     this.$mainBox.$display()
     this.$mainBox.$debugDisplayText()
     this.add.existing(this.$mainBox)
+
+    this.$audioBgm = this.sound.add('bgm', { loop: true, volume: 0.3 })
+    this.$audioDing = this.sound.add('ding', { volume: 0.3 })
+
+    this.$cursorKeys = this.input.keyboard.createCursorKeys()
+    this.$keys = this.input.keyboard.addKeys('I,O,T,L,J,S,Z')
   }
 
   update() {
@@ -87,14 +106,26 @@ export class Game extends Phaser.Scene {
     this.$state = STATE.RUNNING
     this.$touchTimer()
     this.$touchCleanTimer()
+
+    if (this.$audioBgm) {
+      this.$audioBgm.play()
+    }
   }
 
   $gamePause() {
     this.$state = STATE.PAUSED
+
+    if (this.$audioBgm) {
+      this.$audioBgm.pause()
+    }
   }
 
   $gameResume() {
     this.$state = STATE.RUNNING
+
+    if (this.$audioBgm) {
+      this.$audioBgm.resume()
+    }
   }
 
   $gameLoop() {
@@ -143,7 +174,14 @@ export class Game extends Phaser.Scene {
       this.$brick = new Brick(this)
     }
 
-    this.$nextBrick = new Brick(this)
+    let shape = null
+
+    if (this.$nextShape) {
+      shape = this.$nextShape
+      this.$nextShape = null
+    }
+
+    this.$nextBrick = new Brick(this, shape)
     this.$nextBrick.$display()
     this.$nextBrick.$debugDisplayText()
     this.$nextBrick.setX(400)
@@ -161,6 +199,10 @@ export class Game extends Phaser.Scene {
   $gameOver() {
     console.log('Game Over')
     this.$state = STATE.ENDED
+
+    if (this.$audioBgm) {
+      this.$audioBgm.stop()
+    }
   }
 
   $brickDown() {
@@ -175,6 +217,7 @@ export class Game extends Phaser.Scene {
       return
     }
 
+    this.$audioDing.play()
     this.$brickRefresh()
   }
 
@@ -229,6 +272,19 @@ export class Game extends Phaser.Scene {
       }
 
       this.$brickMove(DIRECTION.RIGHT)
+    }
+
+    // 监听字母按键
+    if (DEBUG) {
+      for (let key in this.$keys) {
+        if (this.input.keyboard.checkDown(this.$keys[key], Number.MAX_SAFE_INTEGER)) {
+          if (this.$state !== STATE.RUNNING) {
+            return
+          }
+  
+          this.$nextShape = key
+        }
+      }
     }
   }
 

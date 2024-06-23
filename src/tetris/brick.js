@@ -161,9 +161,11 @@ export class Brick extends Phaser.GameObjects.Container {
 
         const n = this.$matrix[y][x]
         const graphics = this.scene.add.graphics({ x: x * this.$size, y: y * this.$size })
-        graphics.fillStyle(0x666666, 0.4)
+
+        graphics.fillStyle(0x666666, 1)
         graphics.fillRect(1, 1, this.$size, this.$size)
-        graphics.fillStyle(this.$color[n], 0.4)
+
+        graphics.fillStyle(this.$color[n], 1)
         graphics.fillRect(0, 0, this.$size - 1, this.$size - 1)
         graphics.$name = name
 
