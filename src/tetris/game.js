@@ -1,6 +1,7 @@
 import Phaser from 'phaser'
 import { Brick } from './brick'
 import { MainBox } from './mainBox'
+import { DEBUG } from './constant'
 
 const STATE = {
   UNSTART: 0,
