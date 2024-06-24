@@ -23,7 +23,7 @@ export const KEYBOARD_DURATION = 100
 export const TETRIS_SIGN = ['I', 'O', 'T', 'L', 'J', 'S', 'Z']
 
 // 调试模式
-export const DEBUG = true
+export const DEBUG = 1
 
 // 俄罗斯方块颜色
 export const TETRIS_COLOR = {

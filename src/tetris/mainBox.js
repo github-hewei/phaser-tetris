@@ -53,7 +53,8 @@ export class MainBox extends Phaser.GameObjects.Container {
         graphics.fillStyle(0x666666, 1)
         graphics.fillRect(1, 1, this.$size, this.$size)
 
-        graphics.fillStyle(0xebebeb, 1)
+        // graphics.fillStyle(0xebebeb, 1)
+        graphics.fillStyle(0xffffff, 1)
         graphics.fillRect(0, 0, this.$size - 1, this.$size - 1)
         graphics.setDepth(1)
         graphics.$name = name

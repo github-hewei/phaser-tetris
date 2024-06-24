@@ -52,16 +52,16 @@ export class Brick extends Phaser.GameObjects.Container {
   $setMXY(x, y) {
     this.$mx = x
     this.$my = y
-    // this.setPosition(this.$mx * this.$size, this.$my * this.$size)
+    this.setPosition(this.$mx * this.$size, this.$my * this.$size)
 
     // 补间动画
-    let tween = this.scene.tweens.add({
-      targets: this,
-      x: this.$mx * this.$size,
-      y: this.$my * this.$size,
-      duration: 120,
-      ease: Phaser.Math.Easing.Bounce.Out
-    })
+    // let tween = this.scene.tweens.add({
+    //   targets: this,
+    //   x: this.$mx * this.$size,
+    //   y: this.$my * this.$size,
+    //   duration: 120,
+    //   ease: Phaser.Math.Easing.Bounce.Out
+    // })
   }
 
   $getRandomShape() {

@@ -1,7 +1,7 @@
 import Phaser from 'phaser'
 import { Brick } from './brick'
 import { MainBox } from './mainBox'
-import { DEBUG } from './constant'
+import { DEBUG, WINDOW_WIDTH } from './constant'
 
 const STATE = {
   UNSTART: 0,
@@ -25,7 +25,6 @@ export class Game extends Phaser.Scene {
     this.$timer
     this.$cleanTimer
     this.$state
-    this.$step
     this.$score
     this.$brick
     this.$nextBrick
@@ -36,12 +35,14 @@ export class Game extends Phaser.Scene {
     this.$audioDing
     this.$keys
     this.$nextShape
+    this.$scoreText
+    this.$level
   }
 
   preload() {
     this.load.image('background', 'assets/background.jpg')
     this.load.audio('bgm', 'assets/bgm.mp3')
-    this.load.audio('ding', 'assets/ding.mp3')
+    this.load.audio('ding', 'assets/down.mp3')
   }
 
   create() {
@@ -60,6 +61,30 @@ export class Game extends Phaser.Scene {
 
     this.$cursorKeys = this.input.keyboard.createCursorKeys()
     this.$keys = this.input.keyboard.addKeys('I,O,T,L,J,S,Z')
+
+    this.add
+      .text(Math.ceil(WINDOW_WIDTH / 2), 80, 'TETRIS', {
+        fontFamily: 'Arial Black',
+        fontSize: 80,
+        color: '#0f1b35',
+        stroke: '#ffffff',
+        strokeThickness: 8,
+        align: 'center'
+      })
+      .setOrigin(0.5)
+      .setDepth(100)
+
+    this.$scoreText = this.add
+      .text(WINDOW_WIDTH - 200, 500, `得分: 0`, {
+        fontFamily: 'Arial Black',
+        fontSize: 30,
+        color: '#0f1b35',
+        stroke: '#ffffff',
+        strokeThickness: 8,
+        align: 'center'
+      })
+      .setOrigin(0.5)
+      .setDepth(100)
   }
 
   update() {
@@ -101,9 +126,9 @@ export class Game extends Phaser.Scene {
   }
 
   $gameStart() {
-    this.$delay = 2000
+    this.$delay = 1000
     this.$score = 0
-    this.$step = 0
+    this.$level = 1
     this.$state = STATE.RUNNING
     this.$touchTimer()
     this.$touchCleanTimer()
@@ -134,8 +159,7 @@ export class Game extends Phaser.Scene {
       return
     }
 
-    this.$step++
-    console.log('step', this.$step, this.$score)
+    console.log('step', this.$score)
 
     if (!this.$brick) {
       this.$brickRefresh()
@@ -150,11 +174,12 @@ export class Game extends Phaser.Scene {
 
       if (result) {
         this.$mainBox.$clearRow(i)
-        this.$score += 1
 
-        if (this.$score >= 3) {
-          this.$delay = 500
-          this.$touchTimer()
+        let score = this.$score + 1
+        this.$setScore(score)
+
+        if (score % 10 === 0) {
+          this.$setLevel(this.$level + 1)
         }
       }
     }
@@ -168,24 +193,24 @@ export class Game extends Phaser.Scene {
 
     if (this.$nextBrick) {
       let { $shape, $index } = this.$nextBrick
+
+      if (this.$nextShape) {
+        $shape = this.$nextShape
+        $index = null
+        this.$nextShape = null
+      }
+
       this.$nextBrick.destroy()
       this.$brick = new Brick(this, $shape, $index)
-
     } else {
       this.$brick = new Brick(this)
     }
 
-    let shape = null
-
-    if (this.$nextShape) {
-      shape = this.$nextShape
-      this.$nextShape = null
-    }
-
-    this.$nextBrick = new Brick(this, shape)
+    this.$nextBrick = new Brick(this)
     this.$nextBrick.$display()
     this.$nextBrick.$debugDisplayText()
-    this.$nextBrick.setX(400)
+    this.$nextBrick.setX(550)
+    this.$nextBrick.setY(200)
     this.add.existing(this.$nextBrick)
 
     let x = Math.floor((this.$mainBox.$w - this.$brick.$ex - this.$brick.$sx) / 2)
@@ -282,7 +307,7 @@ export class Game extends Phaser.Scene {
           if (this.$state !== STATE.RUNNING) {
             return
           }
-  
+
           this.$nextShape = key
         }
       }
@@ -390,5 +415,17 @@ export class Game extends Phaser.Scene {
     }
 
     return 0
+  }
+
+  $setScore(score) {
+    this.$score = score
+    this.$scoreText.setText(`得分: ${this.$score}`)
+  }
+
+  $setLevel(level) {
+    this.$level = level
+    let delay = Math.max(1000 - (this.$level - 1) * 100, 80)
+    this.$delay = delay
+    this.$touchTimer()
   }
 }
