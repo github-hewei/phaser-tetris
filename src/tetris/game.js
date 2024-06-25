@@ -1,7 +1,7 @@
 import Phaser from 'phaser'
 import { Brick } from './brick'
 import { MainBox } from './mainBox'
-import { DEBUG, WINDOW_WIDTH } from './constant'
+import { DEBUG } from './constant'
 
 const STATE = {
   UNSTART: 0,
@@ -29,8 +29,7 @@ export class Game extends Phaser.Scene {
     this.$brick
     this.$nextBrick
     this.$mainBox
-    this.$nextBox
-    this.$maskSize = 4
+    this.$maskSize
     this.$audioBgm
     this.$audioDing
     this.$keys
@@ -39,18 +38,43 @@ export class Game extends Phaser.Scene {
     this.$level
   }
 
-  preload() {
-    this.load.image('background', 'assets/background.jpg')
-    this.load.audio('bgm', 'assets/bgm.mp3')
-    this.load.audio('ding', 'assets/down.mp3')
+  create(data) {
+    console.log("create", data)
+    this.$init()
+
+    if (data && data.start) {
+      setTimeout(() => {
+        this.$startGame()
+      }, 1000)
+    }
   }
 
-  create() {
+  $init() {
+    this.$delay = 1000
+    this.$timer = null
+    this.$cleanTimer = null
+    this.$score = 0
+    this.$brick = null
+    this.$nextBrick = null
+    this.$maskSize = 4
+    this.$nextShape = null
+    this.$level = 1
+    this.$state = STATE.UNSTART
+
     let width = this.cameras.main.width
     let height = this.cameras.main.height
     this.add.image(0, 0, 'background').setOrigin(0, 0).setDisplaySize(width, height)
+    this.add
+      .text(Math.ceil(width / 2), 80, 'TETRIS', {
+        fontFamily: 'Arial Black',
+        fontSize: 80,
+        color: '#0f1b35',
+        stroke: '#ffffff',
+        strokeThickness: 8,
+        align: 'center'
+      })
+      .setOrigin(0.5)
 
-    this.$state = STATE.UNSTART
     this.$mainBox = new MainBox(this, 50, 10)
     this.$mainBox.$display()
     this.$mainBox.$debugDisplayText()
@@ -62,20 +86,8 @@ export class Game extends Phaser.Scene {
     this.$cursorKeys = this.input.keyboard.createCursorKeys()
     this.$keys = this.input.keyboard.addKeys('I,O,T,L,J,S,Z')
 
-    this.add
-      .text(Math.ceil(WINDOW_WIDTH / 2), 80, 'TETRIS', {
-        fontFamily: 'Arial Black',
-        fontSize: 80,
-        color: '#0f1b35',
-        stroke: '#ffffff',
-        strokeThickness: 8,
-        align: 'center'
-      })
-      .setOrigin(0.5)
-      .setDepth(100)
-
     this.$scoreText = this.add
-      .text(WINDOW_WIDTH - 200, 500, `得分: 0`, {
+      .text(width - 200, 500, `得分: 0`, {
         fontFamily: 'Arial Black',
         fontSize: 30,
         color: '#0f1b35',
@@ -84,7 +96,6 @@ export class Game extends Phaser.Scene {
         align: 'center'
       })
       .setOrigin(0.5)
-      .setDepth(100)
   }
 
   update() {
@@ -125,7 +136,7 @@ export class Game extends Phaser.Scene {
     }
   }
 
-  $gameStart() {
+  $startGame() {
     this.$delay = 1000
     this.$score = 0
     this.$level = 1
@@ -229,6 +240,10 @@ export class Game extends Phaser.Scene {
     if (this.$audioBgm) {
       this.$audioBgm.stop()
     }
+
+    setTimeout(() => {
+      this.scene.start('Over', { score: this.$score })
+    }, 2000)
   }
 
   $brickDown() {
@@ -254,7 +269,7 @@ export class Game extends Phaser.Scene {
       switch (this.$state) {
         case STATE.UNSTART:
         case STATE.ENDED:
-          this.$gameStart()
+          this.$startGame()
           break
         case STATE.RUNNING:
           this.$gamePause()
